@@ -23,6 +23,9 @@ const TAG_OPTIONS = [
 ];
 
 export default function TodoItem({ todo, onToggle, onSave, onDelete }) {
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split("T")[0];
+  
   const [editing, setEditing] = useState(false);
   const [showSubtasks, setShowSubtasks] = useState(false);
   const [form, setForm] = useState({
@@ -68,6 +71,14 @@ export default function TodoItem({ todo, onToggle, onSave, onDelete }) {
       alert("Title required");
       return;
     }
+    else if(form.title.length<3) {
+        alert("Title must be at least 3 characters long");
+        return;
+    }
+    else if(form.title.length>20){
+        alert("Title must be at most not be longer then 20 characters");
+        return;
+    }
     onSave({
       title: form.title.trim(),
       description: form.description.trim(),
@@ -107,9 +118,25 @@ export default function TodoItem({ todo, onToggle, onSave, onDelete }) {
                   <span style={{ marginRight: 8 }}>{todo.createdAt ? new Date(todo.createdAt).toLocaleString() : ""}</span>
                   {todo.dueDate && <span style={{ marginRight: 8 }}>Due: {formatDate(todo.dueDate)}</span>}
                   <span style={{ marginRight: 8 }}>Priority: <strong>{todo.priority}</strong></span>
-                </div>
+</div>
 
-                <div className="tags" aria-hidden>
+{/* --- Subtask Display --- */}
+{todo.subtasks && todo.subtasks.length > 0 && (
+  <div style={{ marginTop: 10 }}>
+    <h4 style={{ marginBottom: 6, fontSize: 14, fontWeight: 700 }}>Subtasks:</h4>
+    <ul style={{ paddingLeft: 20, margin: 0 }}>
+      {todo.subtasks.map((sub) => (
+        <li key={sub.id} style={{ marginBottom: 4 }}>
+          {/* <input type="checkbox" checked={sub.completed} readOnly style={{ marginRight: 6 }} /> */}
+          <span style={{ textDecoration: sub.completed ? "line-through" : "none", color: sub.completed ? "#6b7280" : "inherit" }}>
+            {sub.title}
+          </span>
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
+<div className="tags" aria-hidden>
                   {(todo.tags || []).map((tg) => <div key={tg} className="tag">{tg}</div>)}
                 </div>
               </div>
@@ -117,7 +144,13 @@ export default function TodoItem({ todo, onToggle, onSave, onDelete }) {
               <div onKeyDown={onKey}>
                 <input ref={inputRef} className="input" value={form.title} onChange={(e) => setForm((s) => ({ ...s, title: e.target.value }))} />
                 <div style={{ height: 8 }} />
-                <input className="input" value={form.dueDate} type="date" onChange={(e) => setForm((s) => ({ ...s, dueDate: e.target.value }))} />
+                <input 
+                  className="input" 
+                  value={form.dueDate} 
+                  type="date" 
+                  min={today}
+                  onChange={(e) => setForm((s) => ({ ...s, dueDate: e.target.value }))} 
+                />
                 <div style={{ height: 8 }} />
                 <select className="select" value={form.priority} onChange={(e) => setForm((s) => ({ ...s, priority: e.target.value }))}>
                   <option value="important">Important</option>

@@ -12,7 +12,11 @@
   --shadow: 0 6px 18px rgba(17,24,39,0.08);
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
-
+.buttons-left {
+  display: flex;
+  justify-content: flex-start;
+  gap: 8px;
+}
 *{box-sizing:border-box}
 html,body,#root{height:100%}
 body{

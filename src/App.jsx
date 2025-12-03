@@ -1,5 +1,6 @@
 import React, { useEffect, useReducer, useState } from "react";
 import TodoForm from "./components/TodoFOrm";
+import TodoFormModal from "./components/TodoFormModal";
 import TodoList from "./components/TodoList";
 import FilterBar from "./components/FilterBar";
 
@@ -34,6 +35,7 @@ export default function App() {
   const [todos, dispatch] = useReducer(reducer, []);
   const [filter, setFilter] = useState("all"); // all | active | completed
   const [search, setSearch] = useState("");
+  const [showAddModal, setShowAddModal] = useState(false);
 
   // load from localStorage on mount
   useEffect(() => {
@@ -84,6 +86,7 @@ export default function App() {
   const visibleTodos = todos.filter((t) => {
     if (filter === "active" && t.completed) return false;
     if (filter === "completed" && !t.completed) return false;
+    
     if (search.trim()) {
       const q = search.toLowerCase();
       if (!(t.title.toLowerCase().includes(q) || (t.description || "").toLowerCase().includes(q) || (t.tags || []).join(" ").toLowerCase().includes(q))) {
@@ -95,18 +98,20 @@ export default function App() {
 
   return (
     <div className="app" role="application" aria-label="Todo application">
-      <aside className="panel" aria-label="Controls">
-        <div className="header">
-          <div>
-            <div className="title">Todo List</div>
-            {/* <div className="todo-meta">Build: add/edit/delete, filters, persistence</div> */}
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 14, color: "var(--muted)", fontWeight:700 }}>{itemsLeft} items left</div>
-          </div>
-        </div>
+      {/* Add Todo Button at the bottom right */}
+      <div style={{ position: "fixed", bottom: 30, right: 30, zIndex: 100 }}>
+        <button 
+          className="btn btn-primary" 
+          onClick={() => setShowAddModal(true)}
+          style={{ fontSize: 16, padding: "12px 24px", boxShadow: "0 4px 12px rgba(37,99,235,0.3)" }}
+        >
+          + Add new Todo
+        </button>
+      </div>
 
-        <TodoForm
+      {/* Todo Form Modal */}
+      {showAddModal && (
+        <TodoFormModal
           onAdd={(payload) => {
             const now = Date.now();
             addTodo({
@@ -121,18 +126,20 @@ export default function App() {
               completed: false,
             });
           }}
+          onClose={() => setShowAddModal(false)}
         />
+      )}
 
-        <div style={{ marginTop: 12 }}>          <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <button className="small btn-action" onClick={() => toggleAll(true)} aria-label="Mark all done">Mark all done</button>
-            <button className="small btn-action" onClick={() => toggleAll(false)} aria-label="Mark all undone">Mark all undone</button>
-            <button className="small btn-delete" onClick={() => { if (confirm("Clear all completed todos?")) clearCompleted(); }} aria-label="Clear completed">Clear completed</button>
-          </div>
-        </div>
-      </aside>
-
-      <main className="main" aria-live="polite">
-        <FilterBar filter={filter} setFilter={setFilter} search={search} setSearch={setSearch} visibleCount={visibleTodos.length} />
+      <main className="main" aria-live="polite" style={{ maxWidth: 1200, margin: "0 auto" }}>
+        <FilterBar 
+          filter={filter} 
+          setFilter={setFilter} 
+          search={search} 
+          setSearch={setSearch} 
+          visibleCount={visibleTodos.length}
+          toggleAll={toggleAll}
+          clearCompleted={clearCompleted}
+        />
         <TodoList
           todos={visibleTodos}
           onToggle={toggleTodo}

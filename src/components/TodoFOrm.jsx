@@ -22,6 +22,9 @@ const TAG_OPTIONS = [
 ];
 
 export default function TodoForm({ onAdd }) {
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split("T")[0];
+  
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
@@ -54,6 +57,16 @@ export default function TodoForm({ onAdd }) {
 
     if (!title.trim()) {
       setError("Title is required.");
+      return;
+    }
+    
+    if (title.trim().length < 3) {
+      setError("Title must be at least 3 characters long");
+      return;
+    }
+    
+    if (title.trim().length > 20) {
+      setError("Title must not be longer than 20 characters");
       return;
     }
 
@@ -94,6 +107,7 @@ export default function TodoForm({ onAdd }) {
           type="date"
           className="input"
           value={dueDate}
+          min={today}
           onChange={(e) => setDueDate(e.target.value)}
         />
         <select aria-label="Priority" className="select" value={priority} onChange={(e) => setPriority(e.target.value)}>
